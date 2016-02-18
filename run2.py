@@ -3,8 +3,14 @@ import csv
 import numpy as np
 import pandas as pd
 
+from sklearn.grid_search import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 
+TUNED_PARAMS = [
+                {'n_estimators': [10, 100], 
+                 'max_depth': [5, 10], 
+                 'max_features': [0.05, 'sqrt']}
+               ]
 
 print("Reading data ...")
 df_train = pd.read_csv("train.csv")
@@ -26,7 +32,13 @@ test_id = df_test["ID"] # for submission file
 x_test = df_test.drop(["ID"], axis=1).values
 
 print("Build model and train...")
-clf = RandomForestClassifier()
+clf = GridSearchCV(RandomForestClassifier(n_jobs=2),
+                   param_grid=TUNED_PARAMS,
+                   scoring='log_loss',
+                   n_jobs=2, 
+                   verbose=5,
+                   cv=5
+                  )
 clf.fit(x, y)
 
 print("Predict...")
