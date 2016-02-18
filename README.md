@@ -1,3 +1,12 @@
+Dependancies:
+numpy
+scipy
+pandas
+scikit-learn
+
+
+#Put the data in the same folder
+
 
 Simple version:
 ```python run1.py```
