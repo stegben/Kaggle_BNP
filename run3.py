@@ -75,7 +75,7 @@ clf = GridSearchCV(RandomForestClassifier(n_jobs=2),
 clf.fit(x, y)
 
 print("Predict...")
-true_idx = clf.classes_.tolist().index(1)
+true_idx = clf.best_estimator_.classes_.tolist().index(1)
 pred = clf.predict_proba(x_test)[:, true_idx]
 with open("sub3.csv", "w") as fw:
     writer = csv.writer(fw)
