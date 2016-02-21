@@ -16,7 +16,7 @@ from pre import feature_engineering
 MAX_CAT = 200
 TUNED_PARAMS = [
                 {'n_estimators': [500], 
-                 'max_depth': [5, 10, 15], 
+                 'max_depth': [None], 
                  'max_features': ['sqrt']}
                ]
 
@@ -54,7 +54,7 @@ clf = GridSearchCV(RandomForestClassifier(n_jobs=-1),
                    n_jobs=1, 
                    verbose=5,
                    cv=3,
-                   refit=False
+                   refit=True
                   )
 clf.fit(x, y)
 
