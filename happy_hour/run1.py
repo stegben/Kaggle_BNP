@@ -26,8 +26,8 @@ test_id = df_test["ID"] # for submission file
 x_test = df_test.drop(["ID"], axis=1).values
 
 print("Build model and train...")
-clf = RandomForestClassifier(n_estimators=100,
-                             max_depth=5,
+clf = RandomForestClassifier(n_estimators=10,
+                             max_depth=7,
                              max_features=0.05,
                              verbose=2)
 clf.fit(x, y)

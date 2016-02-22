@@ -11,7 +11,7 @@ def data_cleaning(df, ignore_col=None):
     # don't replace NaN in categorical column
     # for numeric, replace NaN with some specific
 
-    ##### maybe, use NMF to fill in data 
+    ##### maybe, use NMF to fill in data
     """
     pass
 
@@ -27,14 +27,14 @@ def feature_engineering(df, ignore_col=None):
         proc_df = df
     else:
         proc_df = df.drop(ignore_col, axis=1)
-    
+
     feature_dfs = []
     feature_dfs.append(df[ignore_col])
 
     # create features
     feature_dfs.append(process_numerical(proc_df))
     feature_dfs.append(one_hot(proc_df, max_cat=200))
-    feature_dfs.append(discretize(proc_df, target_col="v50", bins=10))
+    feature_dfs.append(discretize(proc_df, target_col="v50", bins=30))
     feature_dfs.append(count_nan(proc_df, pattern=False))
     feature_dfs.append(divide_numerical(proc_df))
     return pd.concat(feature_dfs, axis=1)
@@ -53,18 +53,26 @@ def process_numerical(df):
 
 
 def divide_numerical(df):
-    new_df = pd.DataFrame()
-
     num_col = []
     for feat in df:
-        if df[feat].dtype == "float" or df[feat].dtype == "int":
+        if df[feat].dtype == "float":
             num_col.append(feat)
+    print(len(num_col))
+    new_col = []
+    for idx in range(len(num_col)):
+        col1 = num_col[idx]
+        for idx2 in range(idx+1, len(num_col)):
+            col2 = num_col[idx2]
+            new_col.append(col1+"_d_"+col2)
+            # new_df[col1+"_d_"+col2] = df[col1] / df[col2]
 
+    new_df = pd.DataFrame(index=df.index, columns=new_col, dtype=np.float64)
     for idx in range(len(num_col)):
         col1 = num_col[idx]
         for idx2 in range(idx+1, len(num_col)):
             col2 = num_col[idx2]
             new_df[col1+"_d_"+col2] = df[col1] / df[col2]
+
     new_df = process_numerical(new_df)
     return new_df
 
@@ -79,7 +87,7 @@ def one_hot(df, max_cat=200):
             new_df = pd.concat([new_df, dummy], axis=1)
         else:
             if df[feat].dtype == "object":
-                print("""we drop column {0}, 
+                print("""we drop column {0},
                      since it contains {1} unique values,
                      which is more than {2} """
                      .format(feat, cat_num, max_cat))
@@ -88,8 +96,8 @@ def one_hot(df, max_cat=200):
 
 def discretize(df, target_col, bins):
     discretized_col = pd.cut(df[target_col], bins=bins)
-    return pd.get_dummies(discretized_col, 
-                          prefix=target_col, 
+    return pd.get_dummies(discretized_col,
+                          prefix=target_col,
                           dummy_na=True)
 
 
@@ -98,13 +106,13 @@ def count_nan(df, pattern=False):
     new_df["na_count"] = df.isnull().sum(axis=1)
     if pattern:
         na_pattern = df.isnull().apply(
-            lambda row: ",".join(df.columns[row].tolist()), 
+            lambda row: ",".join(df.columns[row].tolist()),
             axis=1,
             raw=True
         )
         na_pattern_dummy = pd.get_dummies(
-            na_pattern, 
-            prefix="na_pattern_", 
+            na_pattern,
+            prefix="na_pattern_",
             dummy_na=True
         )
         new_df = pd.concat([new_df, na_pattern_dummy], axis=1)
