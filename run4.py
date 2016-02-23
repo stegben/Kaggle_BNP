@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.grid_search import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 from utils import write_ans
 from pre import feature_engineering
@@ -15,9 +15,10 @@ from pre import feature_engineering
 
 MAX_CAT = 200
 TUNED_PARAMS = [
-                {'n_estimators': [500], 
-                 'max_depth': [None], 
-                 'max_features': ['sqrt']}
+                {'n_estimators': [1000], 
+                 'learning_rate': [0.1, 0.05],
+                 'max_depth': [3, 5, 10], 
+                 'max_features': [None]}
                ]
 
 
@@ -42,20 +43,13 @@ df = feature_engineering(df, ignore_col="isTest")
 gc.collect()
 
 print("Extract values")
-x = df[~df["isTest"]].drop("isTest", axis=1)
-print(x)
-y = y[(x["na_count"]<10).values]
-x = x[x["na_count"]<10]
-print(x)
-x = x.values
-print(x.shape)
-
+x = df[~df["isTest"]].drop("isTest", axis=1).values
 x_test = df[df["isTest"]].drop("isTest", axis=1).values
 col_name = df.columns
 del df
 
 print("Build model and train...")
-clf = GridSearchCV(RandomForestClassifier(n_jobs=-1),
+clf = GridSearchCV(GradientBoostingClassifier(verbose=2),
                    param_grid=TUNED_PARAMS,
                    scoring='log_loss',
                    n_jobs=1, 
