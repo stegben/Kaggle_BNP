@@ -1,18 +1,24 @@
 import csv
 import gc
+from pprint import pprint
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from sklearn.grid_search import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 
+from utils import write_ans
+from pre import feature_engineering
+
 
 MAX_CAT = 200
 TUNED_PARAMS = [
-                {'n_estimators': [100], 
-                 'max_depth': [10, None], 
-                 'max_features': [0.3, 'sqrt']}
+                {'n_estimators': [500],
+                 'criteria': ["gini", "entropy"],
+                 'max_depth': [15, None],
+                 'max_features': ['sqrt', 0.5]}
                ]
 
 
@@ -33,51 +39,52 @@ df = pd.concat([df_train, df_test], axis=0)
 del df_train
 del df_test
 
+df = feature_engineering(df, ignore_col="isTest")
 gc.collect()
-
-
-print("One hot encoding...")
-for feat in df:
-    if feat == "isTest":
-        continue
-    elif df[feat].dtype == "object":
-        if len(df[feat].unique()) < MAX_CAT:
-            dummy = pd.get_dummies(df[feat], prefix=feat, dummy_na=True)
-            df = pd.concat([df, dummy], axis=1)
-        else:
-            print("we drop it: {}".format(feat))
-        df.drop(feat, axis=1, inplace=True)
-    elif df[feat].dtype == "float" or df[feat].dtype == "int":
-        fill = df[feat].min() - 1
-        # fill = df[feat].mean()
-        # fill = df[feat].max() + 1
-        df[feat+"_na"] = pd.isnull(df[feat]).astype(int)
-        df[feat] = df[feat].fillna(fill)
-    else:
-        print("Wrong type: {}".format(df[feat].dtype))
-
 
 print("Extract values")
-x = df[~df["isTest"]].drop("isTest", axis=1).values
-x_test = df[df["isTest"]].drop("isTest", axis=1).values
-del df
-gc.collect()
+x = df[~df["isTest"]].drop("isTest", axis=1)
+print(x)
+y = y[(x["na_count"]<10).values]
+x = x[x["na_count"]<10]
+print(x)
+x = x.values
+print(x.shape)
 
+x_test = df[df["isTest"]].drop("isTest", axis=1).values
+col_name = df.columns
+del df
 
 print("Build model and train...")
-clf = GridSearchCV(RandomForestClassifier(n_jobs=2),
+clf = GridSearchCV(RandomForestClassifier(n_jobs=-1),
                    param_grid=TUNED_PARAMS,
                    scoring='log_loss',
-                   n_jobs=2, 
+                   n_jobs=1,
                    verbose=5,
-                   cv=3
+                   cv=3,
+                   refit=True
                   )
 clf.fit(x, y)
+
+pprint(clf.grid_scores_)
+
+imp = clf.best_estimator_.feature_importances_
+plt.scatter(np.arange(len(imp)), imp)
+plt.savefig("imp.png")
+
+for ind in np.argsort(imp)[-50:-1]:
+    print("{0}: {1}".format(col_name[ind], imp[ind]))
 
 print("Predict...")
 true_idx = clf.best_estimator_.classes_.tolist().index(1)
 pred = clf.predict_proba(x_test)[:, true_idx]
+write_ans(fname="sub3.csv",
+          header=["ID", "PredictedProb"],
+          sample_id=test_id,
+          pred=pred)
+"""
 with open("sub3.csv", "w") as fw:
     writer = csv.writer(fw)
     writer.writerow(["ID", "PredictedProb"])
     writer.writerows(zip(test_id, pred))
+"""

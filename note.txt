@@ -1,0 +1,7 @@
+
+
+columns with too few missing entries:
+v10: 169
+v12: 170
+v14: 6
+v22: 977

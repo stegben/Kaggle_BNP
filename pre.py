@@ -34,23 +34,21 @@ def feature_engineering(df, ignore_col=None):
     # create features
     feature_dfs.append(process_numerical(proc_df))
     feature_dfs.append(one_hot(proc_df, max_cat=200))
-    feature_dfs.append(discretize(proc_df, target_col="v50", bins=20))
-    feature_dfs.append(count_nan(proc_df, pattern=True))
-    feature_dfs.append(divide_numerical(proc_df))
+    # feature_dfs.append(discretize(proc_df, target_col="v50", bins=20))
+    feature_dfs.append(count_nan(proc_df, pattern=False))
+    # feature_dfs.append(divide_numerical(proc_df))
     return pd.concat(feature_dfs, axis=1)
 
 
 def process_numerical(df):
     new_df = pd.DataFrame()
     for feat in df:
-        print(feat)
-        if df[feat].dtype == "float":
+        if df[feat].dtype == "float" or df[feat].dtype == "int":
             # fill = df[feat].min() - 1
             fill = df[feat].mean()
             # fill = df[feat].max() + 1
-            new_df[feat+"_na"] = pd.isnull(df[feat]).astype(int)
+            new_df[feat+"_missing"] = pd.isnull(df[feat]).astype(int)
             new_df[feat] = df[feat].fillna(fill)
-            # new_df = pd.concat([new_df, discretize(df, target_col=feat, bins=10)], axis=1)
     return new_df
 
 
@@ -59,7 +57,7 @@ def divide_numerical(df):
     for feat in df:
         if df[feat].dtype == "float":
             num_col.append(feat)
-    print(len(num_col))
+
     new_col = []
     for idx in range(len(num_col)):
         col1 = num_col[idx]
@@ -70,15 +68,19 @@ def divide_numerical(df):
 
     new_df = pd.DataFrame(data=np.ones((len(df.index), len(new_col))), index=df.index, columns=new_col, dtype=np.float64)
     for idx in range(len(num_col)):
-        print(idx)
         col1 = num_col[idx]
         for idx2 in range(idx+1, len(num_col)):
             col2 = num_col[idx2]
-            fill1 = df[col1].mean()
-            fill2 = df[col2].mean()
-            new_df[col1+"_d_"+col2] = df[col1].fillna(fill1) / df[col2].fillna(fill2)
+            fill1 = -1
+            fill2 = -1
 
-    #new_df = process_numerical(new_df)
+            sr1 = df[col1].fillna(fill1)
+            sr2 = df[col2].fillna(fill2)
+
+            new_df[col1+"_d_"+col2] = sr1 / sr2
+            new_df[col1+"_m_"+col2] = sr1 * sr2
+            new_df[col1+"_-_"+col2] = sr1 - sr2
+
     return new_df
 
 
@@ -122,11 +124,3 @@ def count_nan(df, pattern=False):
         )
         new_df = pd.concat([new_df, na_pattern_dummy], axis=1)
     return new_df
-
-
-
-def main():
-    return
-
-if __name__ == "__main__":
-    main()
