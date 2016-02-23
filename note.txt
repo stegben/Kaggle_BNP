@@ -1,4 +1,12 @@
+feature type:
 
+1-X numerical fill na by X
+2-X one hot unique less than
+3   count na
+4   count na and na pattern
+5   numerical division
+6   numerical multiply
+7   numerical minus
 
 columns with too few missing entries:
 v10: 169

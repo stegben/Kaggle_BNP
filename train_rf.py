@@ -8,16 +8,17 @@ from sklearn.ensemble import RandomForestClassifier
 from utils import write_ans, show_feature_importances
 
 TUNED_PARAMS = [
-                {'n_estimators': [5],
+                {'n_estimators': [500],
                  'criterion': ["entropy"],
-                 'max_depth': [5],
-
-                 'max_features': ['sqrt', 0.5]}
+                 'max_depth': [5, 15, None],
+                 'max_features': ['sqrt', 0.25, 0.5]}
                ]
 
 
 if __name__ == "__main__":
     data_fname = sys.argv[1]
+    sub_fname = sys.argv[2]
+
     with open(data_fname, "rb") as fpkl:
         data = pkl.load(fpkl)
 
@@ -32,7 +33,7 @@ if __name__ == "__main__":
                    scoring='log_loss',
                    n_jobs=1,
                    verbose=5,
-                   cv=2,
+                   cv=3,
                    refit=True
                   )
     clf_search.fit(x_train, y_train)
@@ -44,7 +45,7 @@ if __name__ == "__main__":
 
     true_idx = clf.classes_.tolist().index(1)
     pred = clf.predict_proba(x_test)[:, true_idx]
-    write_ans(fname="sub3.csv",
+    write_ans(fname=sub_fname,
               header=["ID", "PredictedProb"],
               sample_id=test_id,
               pred=pred)

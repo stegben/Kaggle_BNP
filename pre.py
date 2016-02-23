@@ -63,7 +63,9 @@ def divide_numerical(df):
         col1 = num_col[idx]
         for idx2 in range(idx+1, len(num_col)):
             col2 = num_col[idx2]
-            new_col.append(col1+"_d_"+col2)
+            # new_col.append(col1+"_d_"+col2)
+            # new_col.append(col1+"_m_"+col2)
+            new_col.append(col1+"_-_"+col2)
             # new_df[col1+"_d_"+col2] = df[col1] / df[col2]
 
     new_df = pd.DataFrame(data=np.ones((len(df.index), len(new_col))), index=df.index, columns=new_col, dtype=np.float64)
@@ -77,8 +79,8 @@ def divide_numerical(df):
             sr1 = df[col1].fillna(fill1)
             sr2 = df[col2].fillna(fill2)
 
-            new_df[col1+"_d_"+col2] = sr1 / sr2
-            new_df[col1+"_m_"+col2] = sr1 * sr2
+            # new_df[col1+"_d_"+col2] = sr1 / sr2
+            # new_df[col1+"_m_"+col2] = sr1 * sr2
             new_df[col1+"_-_"+col2] = sr1 - sr2
 
     return new_df
