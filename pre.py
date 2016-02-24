@@ -38,7 +38,7 @@ def feature_engineering(df, ignore_col=None):
     # feature_dfs.append(discretize(proc_df, target_col="v50", bins=20))
     # feature_dfs.append(discretize(proc_df, target_col="v12", bins=20))
     feature_dfs.append(count_nan(proc_df, pattern=False))
-    feature_dfs.append(divide_numerical(proc_df))
+    # feature_dfs.append(divide_numerical(proc_df))
     return pd.concat(feature_dfs, axis=1)
 
 

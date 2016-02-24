@@ -47,4 +47,4 @@ if __name__ == "__main__":
         output["train"] = {"x": x, "y": y}
         output["test"] = {"x": x_test, "ID": test_id}
         output["feature_name"] = feature_name
-        pkl.dump(output, fpkl, protocol=4)
+        pkl.dump(output, fpkl)
