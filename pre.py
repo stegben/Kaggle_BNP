@@ -39,6 +39,7 @@ def feature_engineering(df, ignore_col=None):
     # feature_dfs.append(discretize(proc_df, target_col="v12", bins=20))
     feature_dfs.append(count_nan(proc_df, pattern=False))
     # feature_dfs.append(divide_numerical(proc_df))
+    feature_dfs.append(az2int(proc_df, target_col="v22"))
     return pd.concat(feature_dfs, axis=1)
 
 
@@ -87,14 +88,25 @@ def divide_numerical(df):
     return new_df
 
 
-
 def one_hot(df, max_cat=200):
     new_df = pd.DataFrame()
+
+    def az_to_int(az):
+        if az==az:  #catch NaN
+            hv = 0
+            for i in range(len(az)):
+                hv += (ord(az[i].lower())-ord('a')+1)*26**(len(az)-1-i)
+            return hv
+        else:
+            return az
+
     for feat in df:
         cat_num = len(df[feat].unique())
         if cat_num < max_cat:
             dummy = pd.get_dummies(df[feat], prefix=feat, dummy_na=True)
             new_df = pd.concat([new_df, dummy], axis=1)
+            if df[feat].dtype == "object":
+                new_df[feat+"_2int"] = df[feat].apply(az_to_int)
         else:
             if df[feat].dtype == "object":
                 print("""we drop column {0},
@@ -127,3 +139,18 @@ def count_nan(df, pattern=False):
         )
         new_df = pd.concat([new_df, na_pattern_dummy], axis=1)
     return new_df
+
+
+def az2int(df, target_col="v22"):
+    new_df = pd.DataFrame()
+    def az_to_int(az):
+        if az==az:  #catch NaN
+            hv = 0
+            for i in range(len(az)):
+                hv += (ord(az[i].lower())-ord('a')+1)*26**(len(az)-1-i)
+            return hv
+        else:
+            return az
+    new_df[target_col + "_2int"] =  df[target_col].apply(az_to_int)
+    return new_df
+

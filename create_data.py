@@ -33,6 +33,8 @@ if __name__ == "__main__":
 
     df = feature_engineering(df, ignore_col="isTest")
 
+    print(df)
+
     print("Extract values")
     x = df[~df["isTest"]].drop("isTest", axis=1).values
     x_test = df[df["isTest"]].drop("isTest", axis=1).values
