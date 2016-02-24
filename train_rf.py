@@ -10,8 +10,8 @@ from utils import write_ans, show_feature_importances
 TUNED_PARAMS = [
                 {'n_estimators': [500],
                  'criterion': ["entropy"],
-                 'max_depth': [5, 15, None],
-                 'max_features': ['sqrt', 0.25, 0.5]}
+                 'max_depth': [10],
+                 'max_features': [0.1]}
                ]
 
 
@@ -27,8 +27,9 @@ if __name__ == "__main__":
     x_test = data["test"]["x"]
     test_id = data["test"]["ID"]
     feat_name = data["feature_name"]
+    print(x_train.shape)
 
-    clf_search = GridSearchCV(RandomForestClassifier(n_jobs=-1),
+    clf_search = GridSearchCV(RandomForestClassifier(n_jobs=24),
                    param_grid=TUNED_PARAMS,
                    scoring='log_loss',
                    n_jobs=1,

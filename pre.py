@@ -34,9 +34,11 @@ def feature_engineering(df, ignore_col=None):
     # create features
     feature_dfs.append(process_numerical(proc_df))
     feature_dfs.append(one_hot(proc_df, max_cat=200))
+    # feature_dfs.append(discretize(proc_df, target_col="v10", bins=20))
     # feature_dfs.append(discretize(proc_df, target_col="v50", bins=20))
+    # feature_dfs.append(discretize(proc_df, target_col="v12", bins=20))
     feature_dfs.append(count_nan(proc_df, pattern=False))
-    # feature_dfs.append(divide_numerical(proc_df))
+    feature_dfs.append(divide_numerical(proc_df))
     return pd.concat(feature_dfs, axis=1)
 
 
@@ -64,9 +66,8 @@ def divide_numerical(df):
         for idx2 in range(idx+1, len(num_col)):
             col2 = num_col[idx2]
             # new_col.append(col1+"_d_"+col2)
-            # new_col.append(col1+"_m_"+col2)
-            new_col.append(col1+"_-_"+col2)
-            # new_df[col1+"_d_"+col2] = df[col1] / df[col2]
+            new_col.append(col1+"_m_"+col2)
+            # new_col.append(col1+"_-_"+col2)
 
     new_df = pd.DataFrame(data=np.ones((len(df.index), len(new_col))), index=df.index, columns=new_col, dtype=np.float64)
     for idx in range(len(num_col)):
@@ -80,8 +81,8 @@ def divide_numerical(df):
             sr2 = df[col2].fillna(fill2)
 
             # new_df[col1+"_d_"+col2] = sr1 / sr2
-            # new_df[col1+"_m_"+col2] = sr1 * sr2
-            new_df[col1+"_-_"+col2] = sr1 - sr2
+            new_df[col1+"_m_"+col2] = sr1 * sr2
+            # new_df[col1+"_-_"+col2] = sr1 - sr2
 
     return new_df
 
@@ -104,7 +105,7 @@ def one_hot(df, max_cat=200):
 
 
 def discretize(df, target_col, bins):
-    discretized_col = pd.cut(df[target_col], bins=bins)
+    discretized_col = pd.qcut(df[target_col], bins)
     return pd.get_dummies(discretized_col,
                           prefix=target_col,
                           dummy_na=True)
