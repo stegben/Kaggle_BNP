@@ -12,12 +12,12 @@ XGB_PARAM = {
    "booster": "gbtree",
    "n_estimators": 1000,
    "eval_metric": "logloss",
-   "eta": 0.01, # 0.06,
+   "eta": 0.03, # 0.06,
    # "min_child_weight": 20,
-   "subsample": 0.75,
-   "colsample_bytree": 0.8,
-   "max_depth": 7,
-   "nthread": 3
+   "subsample": 0.5,
+   "colsample_bytree": 0.7,
+   "max_depth": 8,
+   "nthread": 24
 }
 
 NUM_ROUND = 1000
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # feat_name = data["feature_name"]
     print(x.shape)
 
-    sss = StratifiedShuffleSplit(y, n_iter=3, test_size=0.1)
+    sss = StratifiedShuffleSplit(y, n_iter=1, test_size=0.1)
     for tr_idx, val_idx in sss:
         x_train, x_val = x[tr_idx, :], x[val_idx, :]
         y_train, y_val = y[tr_idx], y[val_idx]
@@ -50,7 +50,7 @@ if __name__ == "__main__":
                           xgtrain,
                           NUM_ROUND,
                           watchlist,
-                          early_stopping_rounds=10)
+                          early_stopping_rounds=20)
     xgtest = xgb.DMatrix(x_test)
     # true_idx = clf.classes_.tolist().index(1)
     pred = model.predict(xgtest)
