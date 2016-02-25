@@ -9,12 +9,11 @@ from sklearn.linear_model import LogisticRegression
 from utils import write_ans, show_feature_importances
 
 TUNED_PARAMS = [
-                {'penalty': ['l1'],
-                 'C': [0.007, 0.01, 0.02],
+                {'penalty': ['l2'],
+                 'C': [0.001],
                  'fit_intercept': [True],
                  'class_weight': [{1:1, 0:1.5},
-                                  {1:1, 0:1},
-                                  {1:1, 0:4}]}
+                                  {1:1, 0:1}]}
                ]
 
 
@@ -38,13 +37,13 @@ if __name__ == "__main__":
     x_test = scaler.transform(x_test)
 
     clf_search = GridSearchCV(
-                   LogisticRegression(tol=0.000001 ,
-                                      solver='liblinear',
-                                      n_jobs=10,
-                                      verbose=0),
+                   LogisticRegression(tol=0.0001 ,
+                                      solver='sag',
+                                      n_jobs=1,
+                                      verbose=1),
                    param_grid=TUNED_PARAMS,
                    scoring='log_loss',
-                   n_jobs=1,
+                   n_jobs=20,
                    verbose=5,
                    cv=3,
                    refit=True
