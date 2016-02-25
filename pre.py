@@ -37,9 +37,15 @@ def feature_engineering(df, ignore_col=None):
     # feature_dfs.append(discretize(proc_df, target_col="v10", bins=20))
     # feature_dfs.append(discretize(proc_df, target_col="v50", bins=20))
     # feature_dfs.append(discretize(proc_df, target_col="v12", bins=20))
-    feature_dfs.append(count_nan(proc_df, pattern=False))
+    feature_dfs.append(count_nan(proc_df, pattern=True))
     # feature_dfs.append(divide_numerical(proc_df))
-    feature_dfs.append(az2int(proc_df, target_col="v22"))
+    # feature_dfs.append(az2int(proc_df, target_col="v22"))
+    feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v21"))
+    feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v10"))
+    feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v19"))
+    feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v14"))
+    feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v40"))
+    feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v21"))
     return pd.concat(feature_dfs, axis=1)
 
 
@@ -106,6 +112,7 @@ def one_hot(df, max_cat=200):
             dummy = pd.get_dummies(df[feat], prefix=feat, dummy_na=True)
             new_df = pd.concat([new_df, dummy], axis=1)
             if df[feat].dtype == "object":
+                new_df[feat+"_fact"] = pd.factorize(df[feat], na_sentinel=0)
                 new_df[feat+"_2int"] = df[feat].apply(az_to_int)
         else:
             if df[feat].dtype == "object":
@@ -154,3 +161,29 @@ def az2int(df, target_col="v22"):
     new_df[target_col + "_2int"] =  df[target_col].apply(az_to_int)
     return new_df
 
+
+def divide_col(df, col1, col2, fill=-1):
+    new_df = pd.DataFrame()
+    sr1 = df[col1].fillna(fill1)
+    sr2 = df[col2].fillna(fill2)
+
+    new_df[col1+"_d_"+col2] = sr1 / sr2
+    return new_df
+
+
+def multiply_col(df, col1, col2, fill=-1):
+    new_df = pd.DataFrame()
+    sr1 = df[col1].fillna(fill1)
+    sr2 = df[col2].fillna(fill2)
+
+    new_df[col1+"_m_"+col2] = sr1 * sr2
+    return new_df
+
+
+def diff_col(df, col1, col2, fill=0):
+    new_df = pd.DataFrame()
+    sr1 = df[col1].fillna(fill1)
+    sr2 = df[col2].fillna(fill2)
+
+    new_df[col1+"_-_"+col2] = sr1 - sr2
+    return new_df
