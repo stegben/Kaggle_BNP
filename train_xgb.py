@@ -3,7 +3,8 @@ import pickle as pkl
 from pprint import pprint
 
 import xgboost as xgb
-from sklearn.cross_validation import StratifiedShuffleSplit
+# from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.cross_validation import StratifiedKFold
 
 from utils import write_ans, show_feature_importances
 
@@ -12,7 +13,7 @@ XGB_PARAM = {
    "booster": "gbtree",
    "n_estimators": 1000,
    "eval_metric": "logloss",
-   "eta": 0.03, # 0.06,
+   "eta": 0.025, # 0.06,
    # "min_child_weight": 20,
    "subsample": 0.5,
    "colsample_bytree": 0.7,
@@ -21,6 +22,8 @@ XGB_PARAM = {
 }
 
 NUM_ROUND = 1000
+
+FOLDS = 3
 
 
 if __name__ == "__main__":
@@ -37,8 +40,9 @@ if __name__ == "__main__":
     # feat_name = data["feature_name"]
     print(x.shape)
 
-    sss = StratifiedShuffleSplit(y, n_iter=1, test_size=0.1)
-    for tr_idx, val_idx in sss:
+    skf = StratifiedKFold(y, n_folds=FOLDS)
+    models = []
+    for tr_idx, val_idx in skf:
         x_train, x_val = x[tr_idx, :], x[val_idx, :]
         y_train, y_val = y[tr_idx], y[val_idx]
 
@@ -50,10 +54,15 @@ if __name__ == "__main__":
                           xgtrain,
                           NUM_ROUND,
                           watchlist,
-                          early_stopping_rounds=20)
+                          early_stopping_rounds=15)
+        models.append(model)
+
     xgtest = xgb.DMatrix(x_test)
     # true_idx = clf.classes_.tolist().index(1)
-    pred = model.predict(xgtest)
+    pred = np.zeros(x_test.shape[0])
+    for model in models:
+        pred += model.predict(xgtest)
+    pred = pred/FOLDS
     write_ans(fname=sub_fname,
               header=["ID", "PredictedProb"],
               sample_id=test_id,
