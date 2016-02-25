@@ -25,7 +25,7 @@ if __name__ == "__main__":
     x_test = data["test"]["x"]
     test_id = data["test"]["ID"]
     feat_name = data["feature_name"]
-    print(x_train.shape)
+    print(x.shape)
 
     scaler = StandardScaler()
 
@@ -39,18 +39,19 @@ if __name__ == "__main__":
 
         model = Sequential()
 
-        model.add(Dense(500, input_dim=x_train.shape[1], activation='tanh'))
-        model.add(Dropout(0.2))
-        model.add(Dense(500, activation='linear'))
+        model.add(Dense(1024, input_dim=x_train.shape[1], activation='linear'))
         model.add(PReLU())
         model.add(Dropout(0.2))
-        model.add(Dense(15, activation='linear'))
+        model.add(Dense(512, activation='linear'))
+        model.add(PReLU())
+        model.add(Dropout(0.2))
+        model.add(Dense(512, activation='linear'))
         model.add(PReLU())
         model.add(Dropout(0.2))
         model.add(Dense(1, activation='sigmoid'))
 
-        # trainer = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-        trainer = Adadelta(lr=0.1, tho=0.98, epsilon=1e-7)
+        trainer = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+        # trainer = Adadelta(lr=0.1, tho=0.98, epsilon=1e-7)
         model.compile(loss='binary_crossentropy', optimizer=trainer)
 
         model.fit(x_train, y_train, nb_epoch=30, batch_size=32, verbose=1, validation_data=(x_val, y_val))
