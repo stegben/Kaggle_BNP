@@ -98,7 +98,7 @@ def one_hot(df, max_cat=200):
                 hv += (ord(az[i].lower())-ord('a')+1)*26**(len(az)-1-i)
             return hv
         else:
-            return az
+            return -1
 
     for feat in df:
         cat_num = len(df[feat].unique())
@@ -150,7 +150,7 @@ def az2int(df, target_col="v22"):
                 hv += (ord(az[i].lower())-ord('a')+1)*26**(len(az)-1-i)
             return hv
         else:
-            return az
+            return -1
     new_df[target_col + "_2int"] =  df[target_col].apply(az_to_int)
     return new_df
 
