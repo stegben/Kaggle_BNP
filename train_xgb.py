@@ -2,6 +2,7 @@ import sys
 import pickle as pkl
 from pprint import pprint
 
+import numpy as np
 import xgboost as xgb
 # from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.cross_validation import StratifiedKFold
@@ -11,19 +12,19 @@ from utils import write_ans, show_feature_importances
 XGB_PARAM = {
    "objective": "binary:logistic",
    "booster": "gbtree",
-   "n_estimators": 1000,
    "eval_metric": "logloss",
    "eta": 0.025, # 0.06,
-   # "min_child_weight": 20,
-   "subsample": 0.5,
-   "colsample_bytree": 0.7,
-   "max_depth": 8,
-   "nthread": 24
+   # "min_child_weight": 1,
+   "subsample": 1.0,
+   "colsample_bytree": 0.4,
+   "max_depth": 11,
+   "nthread": 24,
+   "verbose": 0
 }
 
 NUM_ROUND = 1000
 
-FOLDS = 3
+FOLDS = 5
 
 
 if __name__ == "__main__":
@@ -40,8 +41,9 @@ if __name__ == "__main__":
     # feat_name = data["feature_name"]
     print(x.shape)
 
-    skf = StratifiedKFold(y, n_folds=FOLDS)
+    skf = StratifiedKFold(y, n_folds=FOLDS, random_state=1234)
     models = []
+    error = []
     for tr_idx, val_idx in skf:
         x_train, x_val = x[tr_idx, :], x[val_idx, :]
         y_train, y_val = y[tr_idx], y[val_idx]
@@ -49,14 +51,16 @@ if __name__ == "__main__":
         xgtrain = xgb.DMatrix(x_train, y_train)
         xgval = xgb.DMatrix(x_val, y_val)
 
-        watchlist = [(xgval, 'eval'), (xgtrain, 'train')]
+        watchlist = [(xgtrain, 'train'), (xgval, 'eval')]
         model = xgb.train(XGB_PARAM,
                           xgtrain,
                           NUM_ROUND,
                           watchlist,
-                          early_stopping_rounds=15)
+                          early_stopping_rounds=20)
         models.append(model)
-
+        error.append(model.best_score)
+    print(error)
+    print(sum(error)/FOLDS)
     xgtest = xgb.DMatrix(x_test)
     # true_idx = clf.classes_.tolist().index(1)
     pred = np.zeros(x_test.shape[0])
