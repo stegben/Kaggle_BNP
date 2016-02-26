@@ -9,10 +9,22 @@
 ```python3 create_data.py data.pkl```
 
 ### Run different model on the data
-```python3 train_lr.py data.pkl sub_lr.csv```
-```python3 train_rf.py data.pkl sub_rf.csv```
-```python3 train_xgb.py data.pkl sub_xgb.csv```
-```python3 train_dnn.py data.pkl sub_dnn.csv```
+```
+python3 train_lr.py data.pkl sub_lr.csv
+```
+
+```
+python3 train_rf.py data.pkl sub_rf.csv
+```
+
+```
+python3 train_xgb.py data.pkl sub_xgb.csv
+```
+
+```
+python3 train_dnn.py data.pkl sub_dnn.csv
+```
+
 
 
 ### TODOs:
