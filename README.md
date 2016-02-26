@@ -3,19 +3,19 @@ numpy
 scipy
 pandas
 scikit-learn
+xgboost==0.4a30
 
 
 #Put the data in the same folder
 
+# create data
+```python3 create_data.py data.pkl```
 
-Simple version:
-```python run1.py```
-
-Simple version + parameter tuning with CV
-```python run2.py```
-
-Categorical feature + parameter tuning with CV
-```python run3.py``` 
+# run different model on the data
+```python3 train_lr.py data.pkl sub_lr.csv```
+```python3 train_rf.py data.pkl sub_rf.csv```
+```python3 train_xgb.py data.pkl sub_xgb.csv```
+etc
 
 
 TODOs:
