@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.decomposition import KernelPCA
+from sklearn.manifold import LocallyLinearEmbedding
 
 
 CAT_EXCLUDE_COL = ["v107"]
@@ -50,12 +51,12 @@ def feature_engineering(df, ignore_col=None):
     feature_dfs.append(discretize(proc_df, target_col="v46", bins=20))
     feature_dfs.append(discretize(proc_df, target_col="v89", bins=20))
     feature_dfs.append(discretize(proc_df, target_col="v105", bins=20))
-    feature_dfs.append(discretize(proc_df, target_col="v124", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v124", bins=30))
     feature_dfs.append(discretize(proc_df, target_col="v25", bins=20))
     feature_dfs.append(discretize(proc_df, target_col="v16", bins=20))
     feature_dfs.append(discretize(proc_df, target_col="v63", bins=20))
     feature_dfs.append(discretize(proc_df, target_col="v69", bins=20))
-    feature_dfs.append(count_nan(proc_df, pattern=True))
+    feature_dfs.append(count_nan(proc_df, pattern=False))
     # feature_dfs.append(divide_numerical(proc_df))
     feature_dfs.append(az2int(proc_df, target_col="v22"))
     #feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v21"))
@@ -66,17 +67,19 @@ def feature_engineering(df, ignore_col=None):
     #feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v12"))
     feature_dfs.append(special_50(proc_df, "v21"))
     new_df = pd.concat(feature_dfs, axis=1)
-
-    print("PCA...")
+    """ 
+    print("LLE...")
     t1 = time()
-    pca = KernelPCA(n_components=10, kernel="rbf", eigen_solver='arpack')
-    pca_x = pca.fit_transform(new_df.values)
-    pca_df = pd.DataFrame(data=pca_x,
-                          columns=["pca_"+str(i) for i in range(pca_x.shape[1])])
+    lle = LocallyLinearEmbedding(n_neighbors=10, n_components=3)
+    lle.fit(new_df.values)
+    lle_x = lle.transform(new_df.sample(frac=0.01).values)
+    lle_df = pd.DataFrame(data=lle_x,
+                          columns=["lle_"+str(i) for i in range(lle_x.shape[1])])
     t2 = time()
     print(t2-t1)
-
+    
     new_df = pd.concat([new_df, pca_df], axis=1)
+    """
     return new_df
 
 
@@ -85,8 +88,8 @@ def process_numerical(df):
     new_df = pd.DataFrame()
     for feat in df:
         if df[feat].dtype == "float" or df[feat].dtype == "int":
-            # fill = df[feat].min() - 1
-            fill = df[feat].mean()
+            fill = df[feat].min() - 1
+            # fill = df[feat].mean()
             # fill = df[feat].max() + 1
             new_df[feat+"_missing"] = pd.isnull(df[feat]).astype(int)
             new_df[feat] = df[feat].fillna(fill)
@@ -143,6 +146,7 @@ def one_hot(df, max_cat=200):
         cat_num = len(df[feat].unique())
         if cat_num < max_cat:
             dummy = pd.get_dummies(df[feat], prefix=feat, dummy_na=True)
+            dummy = dummy.ix[:, dummy.sum(axis=0)<1000]
             new_df = pd.concat([new_df, dummy], axis=1)
             if df[feat].dtype == "object":
                 new_df[feat+"_fact"], _ = pd.factorize(df[feat], na_sentinel=0)

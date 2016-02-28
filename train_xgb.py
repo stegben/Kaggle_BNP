@@ -16,8 +16,8 @@ XGB_PARAM = {
    "eta": 0.025, # 0.06,
    # "min_child_weight": 1,
    "subsample": 0.9,
-   "colsample_bytree": 0.6,
-   "max_depth": 10,
+   "colsample_bytree": 0.4,
+   "max_depth": 11,
    "nthread": 30,
    "verbose": 0
 }
