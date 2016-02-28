@@ -1,12 +1,15 @@
 import sys
+from time import time
 
 # import h5py
 import numpy as np
 import pandas as pd
 
+from sklearn.decomposition import KernelPCA
+
 
 CAT_EXCLUDE_COL = ["v107"]
-NUM_EXCLUDE_COL = ["v69", "v76", "v64"]
+NUM_EXCLUDE_COL = ["v69", "v76", "v64", "v60"]
 
 # TODO
 def data_cleaning(df):
@@ -62,7 +65,19 @@ def feature_engineering(df, ignore_col=None):
     #feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v40"))
     #feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v12"))
     feature_dfs.append(special_50(proc_df, "v21"))
-    return pd.concat(feature_dfs, axis=1)
+    new_df = pd.concat(feature_dfs, axis=1)
+
+    print("PCA...")
+    t1 = time()
+    pca = KernelPCA(n_components=10, kernel="rbf", eigen_solver='arpack')
+    pca_x = pca.fit_transform(new_df.values)
+    pca_df = pd.DataFrame(data=pca_x,
+                          columns=["pca_"+str(i) for i in range(pca_x.shape[1])])
+    t2 = time()
+    print(t2-t1)
+
+    new_df = pd.concat([new_df, pca_df], axis=1)
+    return new_df
 
 
 def process_numerical(df):
