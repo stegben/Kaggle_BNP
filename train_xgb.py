@@ -13,12 +13,12 @@ XGB_PARAM = {
    "objective": "binary:logistic",
    "booster": "gbtree",
    "eval_metric": "logloss",
-   "eta": 0.01, # 0.06,
+   "eta": 0.025, # 0.06,
    # "min_child_weight": 1,
-   "subsample": 0.8,
-   "colsample_bytree": 0.8,
+   "subsample": 0.9,
+   "colsample_bytree": 0.4,
    "max_depth": 10,
-   "nthread": 2,
+   "nthread": 30,
    "verbose": 0
 }
 

@@ -66,7 +66,7 @@ def feature_engineering(df, ignore_col=None):
 
 
 def process_numerical(df):
-    df = df[~NUM_EXCLUDE_COL]
+    df = df.drop(NUM_EXCLUDE_COL, axis=1)
     new_df = pd.DataFrame()
     for feat in df:
         if df[feat].dtype == "float" or df[feat].dtype == "int":
@@ -113,7 +113,7 @@ def divide_numerical(df):
 
 def one_hot(df, max_cat=200):
     new_df = pd.DataFrame()
-    df = df[~CAT_COL]
+    df = df.drop(CAT_EXCLUDE_COL, axis=1)
 
     def az_to_int(az):
         if az==az:  #catch NaN
