@@ -13,3 +13,14 @@ v10: 169
 v12: 170
 v14: 6
 v22: 977
+
+
+TODO:
+manually select in one-hot and numerical
+
+binarize: 82,10,46,89, 105, 124, 25, 16, 63,69
+
+special distribution: 5, 36,81,117
+17,48
+
+semi-supervise: use 1/5 propogate label, 5 times as new feature

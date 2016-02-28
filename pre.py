@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 
 
+CAT_EXCLUDE_COL = ["v107"]
+NUM_EXCLUDE_COL = ["v69", "v76", "v64"]
+
 # TODO
 def data_cleaning(df):
     """
@@ -39,9 +42,16 @@ def feature_engineering(df, ignore_col=None):
     # create features
     feature_dfs.append(process_numerical(proc_df))
     feature_dfs.append(one_hot(proc_df, max_cat=200))
-    # feature_dfs.append(discretize(proc_df, target_col="v10", bins=20))
-    # feature_dfs.append(discretize(proc_df, target_col="v50", bins=20))
-    # feature_dfs.append(discretize(proc_df, target_col="v12", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v10", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v82", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v46", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v89", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v105", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v124", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v25", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v16", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v63", bins=20))
+    feature_dfs.append(discretize(proc_df, target_col="v69", bins=20))
     feature_dfs.append(count_nan(proc_df, pattern=True))
     # feature_dfs.append(divide_numerical(proc_df))
     feature_dfs.append(az2int(proc_df, target_col="v22"))
@@ -51,10 +61,12 @@ def feature_engineering(df, ignore_col=None):
     #feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v14"))
     #feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v40"))
     #feature_dfs.append(multiply_col(proc_df, col1="v50", col2="v12"))
+    feature_dfs.append(special_50(proc_df, "v21"))
     return pd.concat(feature_dfs, axis=1)
 
 
 def process_numerical(df):
+    df = df[~NUM_EXCLUDE_COL]
     new_df = pd.DataFrame()
     for feat in df:
         if df[feat].dtype == "float" or df[feat].dtype == "int":
@@ -101,6 +113,7 @@ def divide_numerical(df):
 
 def one_hot(df, max_cat=200):
     new_df = pd.DataFrame()
+    df = df[~CAT_COL]
 
     def az_to_int(az):
         if az==az:  #catch NaN
@@ -193,3 +206,14 @@ def diff_col(df, col1, col2, fill=0):
 
     new_df[col1+"_-_"+col2] = sr1 - sr2
     return new_df
+
+
+def special_50(df, col):
+    new_df = pd.DataFrame()
+    norm_target = df[col]-df[col].mean()
+    col_name = "spe_50_" + col
+    new_sr = df["v50"]*df["v50"] + norm_target*norm_target
+    new_df[col_name] = new_sr.fillna(new_sr.max() + 1)
+    return new_df
+
+

@@ -9,17 +9,32 @@ from sklearn.cross_validation import StratifiedKFold
 
 from utils import write_ans, show_feature_importances
 
-XGB_PARAM = {
+XGB_PARAM_1 = {
    "objective": "binary:logistic",
    "booster": "gbtree",
    "eval_metric": "logloss",
-   "eta": 0.01, # 0.06,
+   "eta": 0.025, # 0.06,
    # "min_child_weight": 1,
-   "subsample": 0.8,
-   "colsample_bytree": 0.8,
-   "max_depth": 10,
-   "nthread": 2,
-   "verbose": 0
+   "subsample": 1.0,
+   "colsample_bytree": 0.4,
+   "max_depth": 11,
+   "nthread": 3,
+   "verbose": 0,
+   "silent": 1,
+}
+
+XGB_PARAM_2 = {
+   "objective": "binary:logistic",
+   "booster": "gbtree",
+   "eval_metric": "logloss",
+   "eta": 0.02, # 0.06,
+   # "min_child_weight": 1,
+   "subsample": 1.0,
+   "colsample_bytree": 0.5,
+   "max_depth": 15,
+   "nthread": 3,
+   "verbose": 0,
+   "silent": 1,
 }
 
 NUM_ROUND = 1000
@@ -34,10 +49,14 @@ if __name__ == "__main__":
     with open(data_fname, "rb") as fpkl:
         data = pkl.load(fpkl)
 
-    x = data["train"]["x"]
+    tmpx = data["train"]["x"]
     y = data["train"]["y"]
     x_test = data["test"]["x"]
     test_id = data["test"]["ID"]
+    feat_name = data["feature_name"]
+    na_count_idx = feat_name.tolist().index("na_count")
+    x = tmpx[tmpx[:, na_count_idx]<30, :]
+    y = y[tmpx[:, na_count_idx]<30]
     # feat_name = data["feature_name"]
     print(x.shape)
 
@@ -52,7 +71,7 @@ if __name__ == "__main__":
         xgval = xgb.DMatrix(x_val, y_val)
 
         watchlist = [(xgtrain, 'train'), (xgval, 'eval')]
-        model = xgb.train(XGB_PARAM,
+        model = xgb.train(XGB_PARAM_2,
                           xgtrain,
                           NUM_ROUND,
                           watchlist,
